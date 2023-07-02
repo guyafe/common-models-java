@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'com.guy_sw.versioning'
-version = '3.5.8'
+version = '3.5.9'
 
 repositories {
     mavenLocal()
@@ -28,8 +28,8 @@ tasks.register('bumpPatchVersion') {
         }
         def status = exec {
             workingDir '.'
-            commandLine 'git', 'status', '--porcelain'
             standardOutput = new ByteArrayOutputStream()
+            commandLine 'git', 'status', '--porcelain'
             println "standard output is: " + standardOutput.toString()
         }
         println "status is: " + status

@@ -18,6 +18,20 @@ repositories {
     mavenCentral()
 }
 
+tasks.register('bumpPatchVersion') {
+    doLast {
+        if (getCurrentBranch() != 'main') {
+            throw new GradleException("You can only bump the patch version on the main branch")
+        }
+        def file = file("build.gradle")
+        def content = file.getText('UTF-8')
+        def nextPatch = version.split("\\.")[2].toInteger() + 1
+        def newVersion = version.split("\\.")[0] + "." + version.split("\\.")[1] + "." + nextPatch
+        content = content.replaceAll("version = '${version}'", "version = '${newVersion}'")
+        file.write(content)
+    }
+}
+
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
@@ -111,7 +125,7 @@ def resolveDependencyVersion(groupName, artifactName, majorMinor) {
 
 def createVersion(groupName, artifactName, versionName, branch) {
     println('Creating version for artifact: ' + groupName + ":" + artifactName + ":" + versionName + " on branch: " + branch)
-    if(branch == "main") {
+    if (branch == "main") {
         println("Branch is main, resolving to current version")
         return version
     } else {

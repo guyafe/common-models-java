@@ -11,18 +11,22 @@ plugins {
 }
 
 group = 'com.guy_sw.versioning'
-version = '3.5.1'
+version = '3.5.2'
 
 repositories {
     mavenLocal()
     mavenCentral()
 }
 
+/**
+ * This task bumps the current patch version and commits the change.
+ */
 tasks.register('bumpPatchVersion') {
     doLast {
         if (getCurrentBranch() != 'main') {
-            throw new GradleException("You can only bump the patch version on the main branch")
+            return // do not bump version on non-main branches
         }
+
         def file = file("build.gradle")
         def content = file.getText('UTF-8')
         def nextPatch = version.split("\\.")[2].toInteger() + 1
@@ -30,7 +34,6 @@ tasks.register('bumpPatchVersion') {
         content = content.replaceAll("version = '${version}'", "version = '${newVersion}'")
         file.write(content)
         println "Bumped version from ${version} to ${newVersion}"
-        println "Pushing to remote"
         exec {
             workingDir '.'
             commandLine 'git', 'add', 'build.gradle'

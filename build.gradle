@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'com.guy_sw.versioning'
-version = '3.5.2'
+version = '3.5.3'
 
 repositories {
     mavenLocal()
@@ -26,7 +26,11 @@ tasks.register('bumpPatchVersion') {
         if (getCurrentBranch() != 'main') {
             return // do not bump version on non-main branches
         }
-
+        def status = exec {
+            workingDir '.'
+            commandLine 'git', 'status', '--porcelain'
+        }
+        println status
         def file = file("build.gradle")
         def content = file.getText('UTF-8')
         def nextPatch = version.split("\\.")[2].toInteger() + 1

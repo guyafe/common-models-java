@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'com.guy_sw.versioning'
-version = '3.5.30'
+version = '3.5.42'
 
 repositories {
     mavenLocal()
@@ -29,14 +29,21 @@ tasks.register('bumpPatchVersion') {
         def newVersion = version.split("\\.")[0] + "." + version.split("\\.")[1] + "." + nextPatch
         content = content.replaceAll("version = '${version}'", "version = '${newVersion}'")
         file.write(content)
+        println "Bumped version from ${version} to ${newVersion}"
 //        def addCommand = "git add build.gradle"
+//        addCommand.execute().waitFor()
 //        def commitCommand = "git commit -m '[NO CI] Bump patch version'"
-//        println(addCommand.execute().text)
-//        println(commitCommand.execute().text)
+//        commitCommand.execute().waitFor()
+////        println(addCommand.execute().text)
+////        println(commitCommand.execute().text)
+        println "Pushing to remote"
         exec {
             workingDir '.'
             commandLine 'git', 'add', 'build.gradle'
-//            commandLine 'git', 'commit', '-m', '[NO CI] Bump patch version'
+        }
+        exec {
+            workingDir '.'
+            commandLine 'git', 'commit', '-m', '[NO CI] Bump patch version'
         }
     }
 }

@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'com.guy_sw.versioning'
-version = '3.5.4'
+version = '3.5.5'
 
 repositories {
     mavenLocal()
@@ -29,6 +29,8 @@ tasks.register('bumpPatchVersion') {
         def status = exec {
             workingDir '.'
             commandLine 'git', 'status', '--porcelain'
+            standardOutput = new ByteArrayOutputStream()
+            println standardOutput.toString()
         }
         println "status is: " + status
         def file = file("build.gradle")

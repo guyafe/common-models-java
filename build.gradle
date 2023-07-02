@@ -29,6 +29,10 @@ tasks.register('bumpPatchVersion') {
         def newVersion = version.split("\\.")[0] + "." + version.split("\\.")[1] + "." + nextPatch
         content = content.replaceAll("version = '${version}'", "version = '${newVersion}'")
         file.write(content)
+        def addCommand = "git add build.gradle"
+        def commitCommand = "git commit -m '[NO CI] Bump patch version'"
+        println(addCommand.execute().text)
+        println(commitCommand.execute().text)
     }
 }
 

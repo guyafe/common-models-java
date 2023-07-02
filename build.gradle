@@ -1,0 +1,124 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'com.guy_sw.versioning'
+version = '3.5.1'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+}
+
+publishing {
+    repositories {
+        maven {
+            url System.properties['user.home'] + "/.m2/repository/"
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            version = createVersion(group, rootProject.name, version, getCurrentBranch());
+            from components.java
+        }
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+testing {
+    suites {
+        // Configure the built-in test suite
+        test {
+            // Use JUnit Jupiter test framework
+            useJUnitJupiter('5.9.1')
+        }
+    }
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+
+def getCurrentBranch() {
+    String gitBranch = 'git branch --show-current'.execute().text.trim()
+    return gitBranch
+}
+
+/**
+ * Check if artifact exists in maven repository
+ * This method uses the Maven local repository.
+ * When using other repositories like Nexus or Artifactory, this method should be changed accordingly.
+ * This method assumes that the artifact is located at ~/.m2/repository
+ * @param groupName
+ * @param artifactName
+ * @param version
+ */
+def artifactExist(groupName, artifactName, version) {
+    def artifactPath = "${groupName.replace(".", "/")}/${artifactName}/${version}"
+    println("Looking for artifact directory: " + artifactPath)
+    def folder = new File(artifactPath)
+    println("artifact exists: " + folder.exists());
+    return folder.exists()
+}
+
+/**
+ * Resolve dependency version according to current branch. Depending if a dependency exists in the repository for the current branch, the version will be resolved to <version>-<branch>-SNAPSHOT.
+ * Otherwise, it will be resolved to latest.
+ * If the branch is main, it will always be resolved to latest.
+ * @param groupName
+ * @param artifactName
+ * @param majorMinor
+ */
+def resolveDependencyVersion(groupName, artifactName, majorMinor) {
+    println("Current major and minor for artifact " + groupName + "-" + artifactName + " is " + majorMinor)
+    String branch = getCurrentBranch()
+    println("Current branch is: " + branch)
+    String suffix
+    if (branch == "main") {
+        suffix = "+"
+    } else {
+        if (artifactExist(groupName, artifactName, majorMinor + "." + branch + "-SNAPSHOT")) {
+            suffix = branch + "-SNAPSHOT" //This is where we get the corresponding dependency from
+        } else {
+            suffix = "+" //This is where we get the latest official version from
+        }
+    }
+    String fullDependency = groupName + ":" + artifactName + ":" + majorMinor + "." + suffix
+    println("Resolving dependency version to: " + fullDependency)
+    return fullDependency
+}
+
+def createVersion(groupName, artifactName, versionName, branch) {
+    println('Creating version for artifact: ' + groupName + ":" + artifactName + ":" + versionName + " on branch: " + branch)
+    if(branch == "main") {
+        println("Branch is main, resolving to current version")
+        return version
+    } else {
+        def majorMinor = versionName.split("\\.")[0] + "." + versionName.split("\\.")[1]
+        def finalVersion = majorMinor + "." + branch + "-SNAPSHOT"
+        println("branch is not main, resolving to: " + finalVersion)
+        return finalVersion
+
+    }
+}

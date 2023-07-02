@@ -1,1 +1,1 @@
-# common-models-java
+# Versioning Project Demo - Common Models

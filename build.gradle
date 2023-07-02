@@ -48,6 +48,10 @@ tasks.register('bumpPatchVersion') {
     }
 }
 
+publishToMavenLocal{
+    dependsOn('bumpPatchVersion')
+}
+
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'

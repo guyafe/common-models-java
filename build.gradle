@@ -28,8 +28,7 @@ tasks.register('bumpPatchVersion') {
         }
         def status = 'git status --porcelain'.execute().text
         if (status != '') {
-            println "There are uncommitted changes, not bumping version"
-            return // do not bump version if there are uncommitted changes
+            throw new GradleException("Cannot bump version on a dirty working tree")
         }
         def file = file("build.gradle")
         def content = file.getText('UTF-8')

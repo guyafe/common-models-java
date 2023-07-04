@@ -39,7 +39,7 @@ publishing {
     }
     publications {
         maven(MavenPublication) {
-            version = createVersion(group, rootProject.name, version, getCurrentBranch())
+            version = createVersionString(group, rootProject.name, version, getCurrentBranch())
             from components.java
         }
     }
@@ -48,7 +48,7 @@ publishing {
 publishToMavenLocal{
     publishing {
         publications {
-            version = createVersion(group, rootProject.name, version, getCurrentBranch())
+            version = createVersionString(group, rootProject.name, version, getCurrentBranch())
         }
     }
     doLast {
@@ -63,6 +63,25 @@ testing {
             // Use JUnit Jupiter test framework
             useJUnitJupiter('5.9.1')
         }
+    }
+}
+
+def getCurrentBranch() {
+    String gitBranch = 'git branch --show-current'.execute().text.trim()
+    return gitBranch
+}
+
+def createVersionString(groupName, artifactName, versionName, branch) {
+    println('Creating version for artifact: ' + groupName + ':' + artifactName + ':' + versionName + ' on branch: ' + branch)
+    if (branch == 'main') {
+        println('Branch is main, resolving to current version: ' + version)
+        return version
+    } else {
+        def majorMinor = versionName.split('\\.')[0] + "." + versionName.split('\\.')[1]
+        def finalVersion = majorMinor + "." + branch + "-SNAPSHOT"
+        println('branch is not main, resolving to: ' + finalVersion)
+        return finalVersion
+
     }
 }
 
@@ -93,11 +112,6 @@ def bumpPatchVersion() {
         workingDir '.'
         commandLine 'git', 'commit', '-m', '[NO CI] Bump patch version'
     }
-}
-
-def getCurrentBranch() {
-    String gitBranch = 'git branch --show-current'.execute().text.trim()
-    return gitBranch
 }
 
 /**
@@ -142,18 +156,4 @@ def resolveDependencyVersion(groupName, artifactName, majorMinor) {
     String fullDependency = groupName + ":" + artifactName + ":" + majorMinor + "." + suffix
     println("Resolving dependency version to: " + fullDependency)
     return fullDependency
-}
-
-def createVersion(groupName, artifactName, versionName, branch) {
-    println('Creating version for artifact: ' + groupName + ":" + artifactName + ":" + versionName + " on branch: " + branch)
-    if (branch == "main") {
-        println("Branch is main, resolving to current version")
-        return version
-    } else {
-        def majorMinor = versionName.split("\\.")[0] + "." + versionName.split("\\.")[1]
-        def finalVersion = majorMinor + "." + branch + "-SNAPSHOT"
-        println("branch is not main, resolving to: " + finalVersion)
-        return finalVersion
-
-    }
 }

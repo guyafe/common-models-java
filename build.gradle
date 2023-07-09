@@ -124,7 +124,7 @@ def bumpPatchVersion() {
  * @param version
  */
 def artifactExist(groupName, artifactName, version) {
-    def artifactPath = "${groupName.replace(".", "/")}/${artifactName}/${version}"
+    def artifactPath = System.properties['user.home'] + "/.m2/repository/" + "${groupName.replace(".", "/")}/${artifactName}/${version}"
     println("Looking for artifact directory: " + artifactPath)
     def folder = new File(artifactPath)
     println("artifact exists: " + folder.exists());

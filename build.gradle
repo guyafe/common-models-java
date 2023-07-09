@@ -11,7 +11,7 @@ plugins {
 }
 
 group = 'com.guy_sw.versioning'
-version = '3.5.2'
+version = '1.0.0'
 
 repositories {
     mavenLocal()
